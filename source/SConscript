@@ -1,0 +1,13 @@
+Import('env')
+
+Lib_Name = 'AvrDriverLib'
+
+Source_Files = ['gpio.c']
+
+CppPath = []
+
+CppPath.append('#Include')
+
+env.Append(CPPPATH=CppPath)
+
+program = env.createLibrary(libraryName=Lib_Name, outputDirectory = '../lib', sourceFiles = Source_Files)
