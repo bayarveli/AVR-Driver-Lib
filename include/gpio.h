@@ -13,12 +13,12 @@
  */
 typedef enum
 {
-	PORTA,
-	PORTB,
-	PORTC,
-	PORTD,
-	PORTE,
-	PORTF
+	PORT_A,
+	PORT_B,
+	PORT_C,
+	PORT_D,
+	PORT_E,
+	PORT_F
 }GpioPortType;
 
 /**
@@ -35,14 +35,14 @@ typedef enum
  */
 typedef enum
 {
-	PIN0,
-	PIN1,
-	PIN2,
-	PIN3,
-	PIN4,
-	PIN5,
-	PIN6,
-	PIN7
+	PIN_0,
+	PIN_1,
+	PIN_2,
+	PIN_3,
+	PIN_4,
+	PIN_5,
+	PIN_6,
+	PIN_7
 }GpioPinNumber;
 
 

@@ -2,7 +2,10 @@ Import('env')
 
 Lib_Name = 'AvrDriverLib'
 
-Source_Files = ['gpio.c']
+Source_Files = ['gpio.c',
+				'usart.c',
+				'timer.c',
+				'interrupt.c']
 
 CppPath = []
 
