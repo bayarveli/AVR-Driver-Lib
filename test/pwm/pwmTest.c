@@ -9,6 +9,7 @@
 #include "usart.h"
 #include "timer.h"
 
+
 #ifdef CLOCK_FREQ
 	#define F_CPU CLOCK_FREQ
 #else

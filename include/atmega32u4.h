@@ -27,6 +27,8 @@
 #define TIMER4A_BASE		(0xBE)
 #define TIMER4B_BASE		(0xCF)
 
+#define I2C_BASE			(0xB8)
+
 /*------------- General Purpose Input/Output (GPIO) --------------------------*/
 typedef struct
 {
@@ -116,6 +118,16 @@ typedef struct
 	uint8_t DT4;
 } Timer4bTypeDef;
 
+typedef struct
+{
+	uint8_t TWBR;
+	uint8_t TWSR;
+	uint8_t TWAR;
+	uint8_t TWDR;
+	uint8_t TWCR;
+	uint8_t TWAMR;
+} I2CTypeDef;
+
 #define GPIOB	((GpioTypeDef *) GPIOB_BASE)
 #define GPIOC	((GpioTypeDef *) GPIOC_BASE)
 #define GPIOD	((GpioTypeDef *) GPIOD_BASE)
@@ -131,5 +143,7 @@ typedef struct
 #define TIMER3			((Timer13TypeDef *) TIMER3_BASE)
 #define TIMER4A			((Timer4aTypeDef *) TIMER4A_BASE)
 #define TIMER4B			((Timer4bTypeDef *) TIMER4B_BASE)
+
+#define I2C				((I2CTypeDef *) I2C_BASE)
 
 #endif /* INCLUDE_ATMEGA32U4_H_ */

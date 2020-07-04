@@ -5,6 +5,7 @@ Lib_Name = 'AvrDriverLib'
 Source_Files = ['gpio.c',
 				'usart.c',
 				'timer.c',
+				'i2c.c',
 				'interrupt.c']
 
 CppPath = []

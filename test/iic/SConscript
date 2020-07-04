@@ -1,0 +1,23 @@
+Import('env')
+
+Executable_Name = 'IICTest'
+
+
+Source_Files = ['iicTest.c']
+
+Libs = []
+CppPath = []
+LibPath = []
+
+CppPath.append('#Include')
+
+Libs.append('libavrdriverlib')
+LibPath.append('#lib')
+
+env.Append(CPPPATH=CppPath)
+env.Append(LIBS=Libs)
+env.Append(LIBPATH=LibPath)
+
+program = env.createExecutable(executableName=Executable_Name, outputDirectory = '../build', sourceFiles = Source_Files)
+
+programHex = env.createHexFile(hexName=Executable_Name, outputDirectory = '../build', elfFile=Executable_Name)
