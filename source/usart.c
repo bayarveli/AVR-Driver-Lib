@@ -5,7 +5,9 @@
  *      Author: veli-
  */
 
+#include <avr/interrupt.h>
 #include "usart.h"
+
 
 static void usart_calculateBaudrate(BaudrateSelect baudrate, uint8_t isDoubleSpeedEnabled);
 
@@ -45,8 +47,8 @@ static void usart_calculateBaudrate(BaudrateSelect baudrate, uint8_t isDoubleSpe
 		ubrrValue = ((CLOCK_FREQ / (8 * baudrateValue)) - 1);
 	}
 
-	pUsart->UBRRL = ubrrValue & 0xFF;
-	pUsart->UBRRH = ubrrValue >> 8;
+	pUsart->sUBRRL = ubrrValue & 0xFF;
+	pUsart->sUBRRH = ubrrValue >> 8;
 }
 
 
@@ -103,9 +105,9 @@ void usart_init(UartModeSelect uartMode,
 		break;
 	}
 
-	pUsart->UCSRA = controlAndStatusRegA;
-	pUsart->UCSRB = controlAndStatusRegB;
-	pUsart->UCSRC = controlAndStatusRegC;
+	pUsart->sUCSRA = controlAndStatusRegA;
+	pUsart->sUCSRB = controlAndStatusRegB;
+	pUsart->sUCSRC = controlAndStatusRegC;
 }
 
 void usart_open()
@@ -113,7 +115,7 @@ void usart_open()
 	UsartTypeDef *pUsart = 0;
 	pUsart = USART1;
 
-	pUsart->UCSRB |= (0x3 << 3);
+	pUsart->sUCSRB |= (0x3 << 3);
 }
 
 void usart_transmit(uint8_t * dataToTransmit, uint8_t isString)
@@ -123,18 +125,18 @@ void usart_transmit(uint8_t * dataToTransmit, uint8_t isString)
 
 	if (isString == 0U)
 	{
-		if ((pUsart->UCSRA & 0x20) >> 5)
+		if ((pUsart->sUCSRA & 0x20) >> 5)
 		{
-			pUsart->UDR = *dataToTransmit;
+			pUsart->sUDR = *dataToTransmit;
 		}
 	}
 	else
 	{
 		while(*(dataToTransmit) != '\0')
 		{
-			if ((pUsart->UCSRA & 0x20) >> 5)
+			if ((pUsart->sUCSRA & 0x20) >> 5)
 			{
-				pUsart->UDR = *(dataToTransmit++);
+				pUsart->sUDR = *(dataToTransmit++);
 			}
 		}
 	}
@@ -149,9 +151,9 @@ void usart_receive(uint8_t * dataReceived, uint8_t *receivedDataCount)
 //
 //	*dataReceived = pUsart->UDR;
 //	*receivedDataCount = 1;
-	if ((pUsart->UCSRA & (1 << 7)))
+	if ((pUsart->sUCSRA & (1 << 7)))
 	{
-		*dataReceived = pUsart->UDR;
+		*dataReceived = pUsart->sUDR;
 		*receivedDataCount = 1;
 	}
 	else
@@ -165,10 +167,26 @@ void usart_close()
 	UsartTypeDef *pUsart = 0;
 	pUsart = USART1;
 
-	pUsart->UCSRB |= (0x0 << 3);
+	pUsart->sUCSRB |= (0x0 << 3);
 }
 
 void usart_flush()
 {
 
 }
+
+void usart_setCallback(void (*ptr)())
+{
+	UsartTypeDef *pUsart = 0;
+	pUsart = USART1;
+
+	usartRxCallback = ptr;
+
+	pUsart->sUCSRB |= (1 << 7); // RXCIE1 enable rx interrupt
+}
+
+ISR(USART1_RX_vect)
+{
+	 usartRxCallback();
+}
+

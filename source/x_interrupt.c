@@ -6,7 +6,7 @@
  */
 
 
-#include "interrupt.h"
+#include <x_interrupt.h>
 
 void interrupt_enableGlobalInterrupt()
 {
@@ -19,4 +19,3 @@ void interrupt_disableGlobalInterrupt()
 	cli();
 }
 
-void interrupt_setCallback();

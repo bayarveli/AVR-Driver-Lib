@@ -48,11 +48,11 @@ void gpio_setDir(GpioPortType portType, GpioPinNumber pinNo, GpioPinDir pinDir)
 		// Enable output
 		if (pinDir)
 		{
-			pGpio->DDR |= (1 << pinNo);
+			pGpio->sDDR |= (1 << pinNo);
 		}
 		else
 		{
-			pGpio->DDR &= ~(1 << pinNo);
+			pGpio->sDDR &= ~(1 << pinNo);
 		}
 	}
 }
@@ -63,7 +63,7 @@ void gpio_setValue(GpioPortType portType, GpioPinNumber pinNo)
 
 	if (pGpio != 0)
 	{
-		pGpio->PORT |= (1 << pinNo);
+		pGpio->sPORT |= (1 << pinNo);
 	}
 }
 
@@ -73,7 +73,7 @@ void gpio_clearValue(GpioPortType portType, GpioPinNumber pinNo)
 
 	if (pGpio != 0)
 	{
-		pGpio->PORT &= ~(1 << pinNo);
+		pGpio->sPORT &= ~(1 << pinNo);
 	}
 
 }
@@ -85,7 +85,7 @@ uint8_t gpio_readValue(GpioPortType portType, GpioPinNumber pinNo)
 
 	if (pGpio != 0)
 	{
-		returnVal = ((pGpio->PORT) & (1 << pinNo)) >> pinNo;
+		returnVal = ((pGpio->sPORT) & (1 << pinNo)) >> pinNo;
 	}
 
 	return returnVal;

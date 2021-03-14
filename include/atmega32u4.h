@@ -32,100 +32,100 @@
 /*------------- General Purpose Input/Output (GPIO) --------------------------*/
 typedef struct
 {
-	uint8_t PIN;
-	uint8_t DDR;
-	uint8_t PORT;
+	uint8_t sPIN;
+	uint8_t sDDR;
+	uint8_t sPORT;
 } GpioTypeDef;
 
 /*------------- USART --------------------------*/
 typedef struct
 {
-	uint8_t UCSRA;
-	uint8_t UCSRB;
-	uint8_t UCSRC;
-	uint8_t UCSRD;
-	uint8_t UBRRL;
-	uint8_t UBRRH;
-	uint8_t UDR;
+	uint8_t sUCSRA;
+	uint8_t sUCSRB;
+	uint8_t sUCSRC;
+	uint8_t sUCSRD;
+	uint8_t sUBRRL;
+	uint8_t sUBRRH;
+	uint8_t sUDR;
 } UsartTypeDef;
 
 /*------------- TIMERS --------------------------*/
 
 typedef struct
 {
-	uint8_t TIFR0;
-	uint8_t TIFR1;
+	uint8_t sTIFR0;
+	uint8_t sTIFR1;
 	uint8_t Reserved;
-	uint8_t TIFR3;
-	uint8_t TIFR4;
+	uint8_t sTIFR3;
+	uint8_t sTIFR4;
 } TimerIntFlagTypeDef;
 
 typedef struct
 {
-	uint8_t TIMSK0;
-	uint8_t TIMSK1;
+	uint8_t sTIMSK0;
+	uint8_t sTIMSK1;
 	uint8_t Reserved;
-	uint8_t TIMSK3;
-	uint8_t TIMSK4;
+	uint8_t sTIMSK3;
+	uint8_t sTIMSK4;
 } TimerIntMaskTypeDef;
 
 typedef struct
 {
-	uint8_t TCCR0A;
-	uint8_t TCCR0B;
-	uint8_t TCNT0;
-	uint8_t OCR0A;
-	uint8_t OCR0B;
+	uint8_t sTCCR0A;
+	uint8_t sTCCR0B;
+	uint8_t sTCNT0;
+	uint8_t sOCR0A;
+	uint8_t sOCR0B;
 } Timer0TypeDef;
 
 typedef struct
 {
-	uint8_t TCCR13A;
-	uint8_t TCCR13B;
-	uint8_t TCCR13C;
+	uint8_t sTCCR13A;
+	uint8_t sTCCR13B;
+	uint8_t sTCCR13C;
 	uint8_t Reserved;
-	uint8_t TCNT13L;
-	uint8_t TCNT13H;
-	uint8_t ICR13L;
-	uint8_t ICR13H;
-	uint8_t OCR13AL;
-	uint8_t OCR13AH;
-	uint8_t OCR13BL;
-	uint8_t OCR13BH;
-	uint8_t OCR13CL;
-	uint8_t OCR13CH;
+	uint8_t sTCNT13L;
+	uint8_t sTCNT13H;
+	uint8_t sICR13L;
+	uint8_t sICR13H;
+	uint8_t sOCR13AL;
+	uint8_t sOCR13AH;
+	uint8_t sOCR13BL;
+	uint8_t sOCR13BH;
+	uint8_t sOCR13CL;
+	uint8_t sOCR13CH;
 } Timer13TypeDef;
 
 
 typedef struct
 {
-	uint8_t TCNT4;
-	uint8_t TC4H;
-	uint8_t TCCR4A;
-	uint8_t TCCR4B;
-	uint8_t TCCR4C;
-	uint8_t TCCR4D;
-	uint8_t TCCR4E;
+	uint8_t sTCNT4;
+	uint8_t sTC4H;
+	uint8_t sTCCR4A;
+	uint8_t sTCCR4B;
+	uint8_t sTCCR4C;
+	uint8_t sTCCR4D;
+	uint8_t sTCCR4E;
 } Timer4aTypeDef;
 
 typedef struct
 {
-	uint8_t OCR4A;
-	uint8_t OCR4B;
-	uint8_t OCR4C;
-	uint8_t OCR4D;
+	uint8_t sOCR4A;
+	uint8_t sOCR4B;
+	uint8_t sOCR4C;
+	uint8_t sOCR4D;
 	uint8_t Reserved;
-	uint8_t DT4;
+	uint8_t sDT4;
 } Timer4bTypeDef;
 
 typedef struct
 {
-	uint8_t TWBR;
-	uint8_t TWSR;
-	uint8_t TWAR;
-	uint8_t TWDR;
-	uint8_t TWCR;
-	uint8_t TWAMR;
+	uint8_t sTWBR;
+	uint8_t sTWSR;
+	uint8_t sTWAR;
+	uint8_t sTWDR;
+	uint8_t sTWCR;
+	uint8_t sTWAMR;
 } I2CTypeDef;
 
 #define GPIOB	((GpioTypeDef *) GPIOB_BASE)

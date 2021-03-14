@@ -52,8 +52,8 @@ typedef enum
  * @param pinNo		Pin number
  * @param pinDir	Pin direction
  * @return	N/A
- * @note	There is a note.
- * @warning No warning
+ * @note	N/A
+ * @warning N/A
  */
 void gpio_setDir(GpioPortType portType, GpioPinNumber pinNo, GpioPinDir pinDir);
 
@@ -61,9 +61,9 @@ void gpio_setDir(GpioPortType portType, GpioPinNumber pinNo, GpioPinDir pinDir);
  * @brief Sets pin value - LOGIC HIGH
  * @param portType 	Port type
  * @param pinNo		Pin number
-  * @return	N/A
- * @note	There is a note.
- * @warning No warning
+ * @return	N/A
+ * @note	N/A
+ * @warning N/A
  */
 void gpio_setValue(GpioPortType portType, GpioPinNumber pinNo);
 
@@ -72,8 +72,8 @@ void gpio_setValue(GpioPortType portType, GpioPinNumber pinNo);
  * @param portType 	Port type
  * @param pinNo		Pin number
  * @return	N/A
- * @note	There is a note.
- * @warning No warning
+ * @note	N/A
+ * @warning N/A
  */
 void gpio_clearValue(GpioPortType portType, GpioPinNumber pinNo);
 
@@ -82,7 +82,7 @@ void gpio_clearValue(GpioPortType portType, GpioPinNumber pinNo);
  * @param portType 	Port type
  * @param pinNo		Pin number
  * @return	uint8_t	Pin value
- * @note	There is a note.
- * @warning No warning
+ * @note	N/A
+ * @warning N/A
  */
 uint8_t gpio_readValue(GpioPortType portType, GpioPinNumber pinNo);

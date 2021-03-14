@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "atmega32u4.h"
 
+static void (*usartRxCallback)(void);
 
 // uart mode selection
 typedef enum
@@ -67,12 +68,19 @@ typedef enum
 }SpeedSelect;
 
 /**
- * @brief Reads pin value
- * @param portType 	Port type
- * @param pinNo		Pin number
- * @return	uint8_t	Pin value
- * @note	There is a note.
- * @warning No warning
+ * @brief Initialize USART interface -
+ * Mode, Baudrate, DataBit, Parity, StopBit,
+ * Polarity, Speed
+ * @param uartMode 		USART operation mode
+ * @param baudrate		Data transfer speed
+ * @param dataBit		Data size
+ * @param parityMode	Parity selection
+ * @param stopBit		Stop bit size
+ * @param polarity		Operating edge selection - rising or falling
+ * @param speed			Speed selection between double and nominal
+ * @return	N/A
+ * @note	N/A
+ * @warning N/A
  */
 void usart_init(UartModeSelect uartMode,
 				BaudrateSelect baudrate,
@@ -132,3 +140,4 @@ void usart_close();
  */
 void usart_flush();
 
+void usart_setCallback(void (*ptr)());

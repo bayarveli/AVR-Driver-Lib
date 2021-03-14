@@ -37,9 +37,9 @@ typedef enum
 typedef enum
 {
 	START,
-	RSTART,	/* Repeated Start */
-	SADDRESS, /* Slave address */
-	WADDRESS, /* Word address */
+	REPEATEDSTART,	/* Repeated Start */
+	SLAVEADDRESS, /* Slave address */
+	REGISTERADDRESS, /* Word address */
 	DATA,
 	STOP
 }TransmitStateType;
@@ -50,14 +50,17 @@ void i2c_init()
 	pI2C = I2C;
 
 	// 100 kHz
-	pI2C->TWBR = 18;
-	pI2C->TWSR |= (DIVIDED_BY_1 & 0x3);
+	pI2C->sTWBR = 18;
+	pI2C->sTWSR |= (DIVIDED_BY_1 & 0x3);
 }
 
 
-uint8_t i2c_write(uint8_t slaveAddress, uint8_t wordAddress, uint8_t *dataToSent, uint8_t dataLen)
+uint8_t i2c_write(uint8_t aSlaveAddress, uint8_t *aRegisterAddress,
+		uint8_t aRegLen, uint8_t *aDataToSent, uint8_t aDataLen)
 {
 	TransmitStateType currState = START;
+	uint8_t dataIdx = 0;
+	uint8_t regIdx = 0;
 	I2CTypeDef *pI2C = 0;
 	pI2C = I2C;
 
@@ -67,86 +70,109 @@ uint8_t i2c_write(uint8_t slaveAddress, uint8_t wordAddress, uint8_t *dataToSent
 		{
 		case START:
 			// Clear TWINT Bit; Writing 1 clears TWINT
-			pI2C->TWCR |= (1 << 7);
+			pI2C->sTWCR |= (1 << 7);
 			// Set TWSTA Bit
-			pI2C->TWCR |= (1 << 5);
+			pI2C->sTWCR |= (1 << 5);
 			// Set TWEN Enable Bit
-			pI2C->TWCR |= (1 << 2);
+			pI2C->sTWCR |= (1 << 2);
 
 			/*
 			 * Wait for TWINT Flag is set. This indicates
 			 * that the START condition has been transmitted.
 			 */
-			while (!(pI2C->TWCR & (1 << 7)));
+			while (!(pI2C->sTWCR & (1 << 7)));
 
 			/*
 			 * Check value of TWI Status Register. If status
 			 * is different from START, then return error.
 			 */
-			if (((pI2C->TWSR & 0xF8)) != START_OK) {
-				return ((pI2C->TWSR & 0xF8));
-			} else {
-				currState = SADDRESS;
-			}
-			break;
-		case SADDRESS:
-			pI2C->TWDR = ((slaveAddress & 0x7F) << 1) | (0 & 0x1);
-			pI2C->TWCR &= ~(1 << 5);
-			pI2C->TWCR |= (1 << 7);
-			pI2C->TWCR |= (1 << 2);
-
-			while (!(pI2C->TWCR & (1 << 7)));
-
-			if (((pI2C->TWSR & 0xF8)) != SLAVE_WRITE_ACK_OK)
+			if (((pI2C->sTWSR & 0xF8)) != START_OK)
 			{
-				return ((pI2C->TWSR & 0xF8));
+				return ((pI2C->sTWSR & 0xF8));
 			}
 			else
 			{
-				currState = WADDRESS;
+				currState = SLAVEADDRESS;
 			}
 			break;
-		case WADDRESS:
-			pI2C->TWDR = wordAddress;
-			pI2C->TWCR |= (1 << 7);
-			pI2C->TWCR |= (1 << 2);
+		case SLAVEADDRESS:
+			pI2C->sTWDR = ((aSlaveAddress & 0x7F) << 1) | (0 & 0x1);
+			pI2C->sTWCR &= ~(1 << 5);
+			pI2C->sTWCR |= (1 << 7);
+			pI2C->sTWCR |= (1 << 2);
 
-			while (!(pI2C->TWCR & (1 << 7)));
+			while (!(pI2C->sTWCR & (1 << 7)));
 
-			if (((pI2C->TWSR & 0xF8)) != DATA_WRITE_ACK_OK)
+			if (((pI2C->sTWSR & 0xF8)) != SLAVE_WRITE_ACK_OK)
 			{
-				return ((pI2C->TWSR & 0xF8));
+				return ((pI2C->sTWSR & 0xF8));
 			}
 			else
 			{
-				currState = DATA;
+				currState = REGISTERADDRESS;
 			}
+			break;
+		case REGISTERADDRESS:
+
+			for (regIdx = 0; regIdx < aRegLen; regIdx++)
+			{
+				pI2C->sTWDR = aRegisterAddress[regIdx];
+				pI2C->sTWCR |= (1 << 7);
+				pI2C->sTWCR |= (1 << 2);
+
+				while (!(pI2C->sTWCR & (1 << 7)));
+
+				if (((pI2C->sTWSR & 0xF8)) != DATA_WRITE_ACK_OK)
+				{
+					return ((pI2C->sTWSR & 0xF8));
+				}
+			}
+
+			currState = DATA;
+
 			break;
 		case DATA:
-			pI2C->TWDR = *(dataToSent++);
-			pI2C->TWCR |= (1 << 7);
-			pI2C->TWCR |= (1 << 2);
 
-			while (!(pI2C->TWCR & (1 << 7)));
-
-			if (((pI2C->TWSR & 0xF8)) != DATA_WRITE_ACK_OK)
+			if (aDataLen > 1)
 			{
-				return ((pI2C->TWSR & 0xF8));
+				for (dataIdx = 0; dataIdx < aDataLen; dataIdx++)
+				{
+					pI2C->sTWDR = aDataToSent[dataIdx];
+					pI2C->sTWCR |= (1 << 7);
+					pI2C->sTWCR |= (1 << 2);
+
+					while (!(pI2C->sTWCR & (1 << 7)));
+
+					if (((pI2C->sTWSR & 0xF8)) != DATA_WRITE_ACK_OK)
+					{
+						return ((pI2C->sTWSR & 0xF8));
+					}
+				}
 			}
 			else
 			{
-				currState = STOP;
+				pI2C->sTWDR = *aDataToSent;
+				pI2C->sTWCR |= (1 << 7);
+				pI2C->sTWCR |= (1 << 2);
+
+				while (!(pI2C->sTWCR & (1 << 7)));
+
+				if (((pI2C->sTWSR & 0xF8)) != DATA_WRITE_ACK_OK)
+				{
+					return ((pI2C->sTWSR & 0xF8));
+				}
 			}
 
+			currState = STOP;
 			break;
 		case STOP:
 
 			// Clear TWINT Bit; Writing 1 clears TWINT
-			pI2C->TWCR |= (1 << 7);
+			pI2C->sTWCR |= (1 << 7);
 			// Set TWSTO Bit
-			pI2C->TWCR |= (1 << 4);
+			pI2C->sTWCR |= (1 << 4);
 			// Set TWEN Enable Bit
-			pI2C->TWCR |= (1 << 2);
+			pI2C->sTWCR |= (1 << 2);
 
 			return NO_ERROR;
 			break;
@@ -156,11 +182,13 @@ uint8_t i2c_write(uint8_t slaveAddress, uint8_t wordAddress, uint8_t *dataToSent
 	}
 }
 
-uint8_t i2c_read_after_write(uint8_t slaveAddress, uint8_t wordAddress, uint8_t *dataToReceive)
+uint8_t i2c_read_after_write(uint8_t aSlaveAddress, uint8_t *aRegisterAddress,
+		uint8_t aRegLen, uint8_t *aDataToReceive, uint8_t aDataLen)
 {
 	TransmitStateType currState = START;
 	TransmitStateType previousState = START;
 	uint8_t dataIdx = 0;
+	uint8_t regIdx = 0;
 	I2CTypeDef *pI2C = 0;
 
 	pI2C = I2C;
@@ -171,57 +199,57 @@ uint8_t i2c_read_after_write(uint8_t slaveAddress, uint8_t wordAddress, uint8_t 
 		{
 		case START:
 			// Set TWSTA Bit
-			pI2C->TWCR |= (1 << 5);
+			pI2C->sTWCR |= (1 << 5);
 			// Clear TWINT Bit; Writing 1 clears TWINT
-			pI2C->TWCR |= (1 << 7);
+			pI2C->sTWCR |= (1 << 7);
 			// Set TWEN Enable Bit
-			pI2C->TWCR |= (1 << 2);
+			pI2C->sTWCR |= (1 << 2);
 
 			/*
 			 * Wait for TWINT Flag is set. This indicates
 			 * that the START condition has been transmitted.
 			 */
-			while (!(pI2C->TWCR & (1 << 7)));
+			while (!(pI2C->sTWCR & (1 << 7)));
 
 			/*
 			 * Check value of TWI Status Register. If status
 			 * is different from START, then return error.
 			 */
-			if (((pI2C->TWSR & 0xF8) == START_OK) || ((pI2C->TWSR & 0xF8) == REPEATED_START_OK))
+			if (((pI2C->sTWSR & 0xF8) == START_OK) || ((pI2C->sTWSR & 0xF8) == REPEATED_START_OK))
 			{
-				currState = SADDRESS;
+				currState = SLAVEADDRESS;
 			}
 			else
 			{
-				return ((pI2C->TWSR & 0xF8) >> 3);
+				return ((pI2C->sTWSR & 0xF8));
 			}
 
 			break;
-		case SADDRESS:
+		case SLAVEADDRESS:
 			if (previousState == START)
 			{
-				pI2C->TWDR = ((slaveAddress & 0x7F) << 1) | (0 & 0x1);
+				pI2C->sTWDR = ((aSlaveAddress & 0x7F) << 1) | (0 & 0x1);
 			}
-			else if (previousState == SADDRESS)
+			else if (previousState == SLAVEADDRESS)
 			{
-				pI2C->TWDR = ((slaveAddress & 0x7F) << 1) | (1 & 0x1);
+				pI2C->sTWDR = ((aSlaveAddress & 0x7F) << 1) | (1 & 0x1);
 			}
 
 			// Set TWSTA Bit
-			pI2C->TWCR &= ~(1 << 5);
-			pI2C->TWCR |= (1 << 7);
-			pI2C->TWCR |= (1 << 2);
+			pI2C->sTWCR &= ~(1 << 5);
+			pI2C->sTWCR |= (1 << 7);
+			pI2C->sTWCR |= (1 << 2);
 
-			while (!(pI2C->TWCR & (1 << 7)));
+			while (!(pI2C->sTWCR & (1 << 7)));
 
-			if (((pI2C->TWSR & 0xF8) == SLAVE_WRITE_ACK_OK) || ((pI2C->TWSR & 0xF8) == SLAVE_READ_ACK_OK))
+			if (((pI2C->sTWSR & 0xF8) == SLAVE_WRITE_ACK_OK) || ((pI2C->sTWSR & 0xF8) == SLAVE_READ_ACK_OK))
 			{
 
 				if (previousState == START)
 				{
-					currState = WADDRESS;
+					currState = REGISTERADDRESS;
 				}
-				else if (previousState == SADDRESS)
+				else if (previousState == SLAVEADDRESS)
 				{
 					currState = DATA;
 					previousState = START;
@@ -229,66 +257,81 @@ uint8_t i2c_read_after_write(uint8_t slaveAddress, uint8_t wordAddress, uint8_t 
 			}
 			else
 			{
-				return ((pI2C->TWSR & 0xF8) >> 3);
+				return ((pI2C->sTWSR & 0xF8));
 			}
 
 			break;
-		case WADDRESS:
-			pI2C->TWDR = wordAddress;
-			pI2C->TWCR |= (1 << 7);
-			pI2C->TWCR |= (1 << 2);
+		case REGISTERADDRESS:
 
-			while (!(pI2C->TWCR & (1 << 7)));
-
-			if (((pI2C->TWSR & 0xF8)) != DATA_WRITE_ACK_OK)
+			for (regIdx = 0; regIdx < aRegLen;  regIdx++)
 			{
-				return ((pI2C->TWSR & 0xF8) >> 3);
-			}
-			else
-			{
-				currState = START;
-				previousState = SADDRESS;
+				pI2C->sTWDR = aRegisterAddress[regIdx];
+				pI2C->sTWCR |= (1 << 7);
+				pI2C->sTWCR |= (1 << 2);
+
+				while (!(pI2C->sTWCR & (1 << 7)));
+
+				if (((pI2C->sTWSR & 0xF8)) != DATA_WRITE_ACK_OK)
+				{
+					return ((pI2C->sTWSR & 0xF8));
+				}
 			}
 
+			currState = START;
+			previousState = SLAVEADDRESS;
 			break;
 		case DATA:
 
-
-			pI2C->TWCR |= (1 << 7);
-			pI2C->TWCR |= (1 << 2);
-
-			while (!(pI2C->TWCR & (1 << 7)));
-
-			*(dataToReceive++) = pI2C->TWDR;
-
-			if (((pI2C->TWSR & 0xF8)) == DATA_READ_ACK_OK)
+			for (dataIdx = 0; dataIdx < aDataLen; dataIdx++)
 			{
+				pI2C->sTWCR |= (1 << 7);
+				pI2C->sTWCR |= (1 << 2);
 
-				currState = DATA;
-				previousState = SADDRESS;
-			}
-			else if ((((pI2C->TWSR & 0xF8)) == DATA_READ_ACK_NOT_OK))
-			{
-				currState = STOP;
-				previousState = DATA;
-			}
-			else
-			{
-				return ((pI2C->TWSR & 0xF8) >> 3);
+				while (!(pI2C->sTWCR & (1 << 7)));
+
+				aDataToReceive[dataIdx] = pI2C->sTWDR;
+
+//				if (((pI2C->sTWSR & 0xF8)) == DATA_READ_ACK_OK)
+//				{
+//
+//					currState = DATA;
+//					previousState = SLAVEADDRESS;
+//				}
+//				else if ((((pI2C->sTWSR & 0xF8)) == DATA_READ_ACK_NOT_OK))
+//				{
+//					currState = STOP;
+//					previousState = DATA;
+//				}
+//				else
+//				{
+//					return ((pI2C->sTWSR & 0xF8) >> 3);
+//				}
+				if (((pI2C->sTWSR & 0xF8)) == DATA_READ_ACK_OK)
+				{
+
+					currState = DATA;
+					previousState = SLAVEADDRESS;
+				}
+				else if ((((pI2C->sTWSR & 0xF8)) == DATA_READ_ACK_NOT_OK))
+				{
+					currState = STOP;
+					previousState = DATA;
+				}
+				else
+				{
+					return ((pI2C->sTWSR & 0xF8));
+				}
 			}
 
 			break;
 		case STOP:
 			// Set TWSTO Bit
-			pI2C->TWCR |= (1 << 4);
+			pI2C->sTWCR |= (1 << 4);
 			// Clear TWINT Bit; Writing 1 clears TWINT
-			pI2C->TWCR |= (1 << 7);
+			pI2C->sTWCR |= (1 << 7);
 			// Set TWEN Enable Bit
-			pI2C->TWCR |= (1 << 2);
-
-
+			pI2C->sTWCR |= (1 << 2);
 			return NO_ERROR;
-
 			break;
 		default:
 			break;

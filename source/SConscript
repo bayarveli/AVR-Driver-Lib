@@ -6,7 +6,7 @@ Source_Files = ['gpio.c',
 				'usart.c',
 				'timer.c',
 				'i2c.c',
-				'interrupt.c']
+				'x_interrupt.c']
 
 CppPath = []
 
