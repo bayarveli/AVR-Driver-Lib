@@ -44,6 +44,7 @@ def createLibrary(env, libraryName, outputDirectory, sourceFiles):
         
         objectList.append(objectFile)
     
+#     program = env.StaticLibrary(outputDirectory + '/' + fullLibraryName + '.a', objectList)
     program = env.StaticLibrary(outputDirectory + '/' + fullLibraryName + '.a', objectList)   
     env.Alias(libraryName, program)
      

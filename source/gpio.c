@@ -85,7 +85,7 @@ uint8_t gpio_readValue(GpioPortType portType, GpioPinNumber pinNo)
 
 	if (pGpio != 0)
 	{
-		returnVal = ((pGpio->sPORT) & (1 << pinNo)) >> pinNo;
+		returnVal = ((pGpio->sPIN) & (1 << pinNo)) >> pinNo;
 	}
 
 	return returnVal;
